@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIFA Versus Kura</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #38bdf8;
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .filter-area {
+            background: rgba(30, 41, 59, 0.5);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .filter-area label {
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .filter-area select {
+            background: #1e293b;
+            color: #fff;
+            border: 2px solid #38bdf8;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .vs-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .player-card {
+            flex: 1;
+            background: rgba(30, 41, 59, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 260px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .player-card.active-selection {
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .player-tag {
+            position: absolute;
+            top: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .p1 .player-tag { background: #ef4444; color: white; }
+        .p2 .player-tag { background: #3b82f6; color: white; }
+
+        .logo-placeholder {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-placeholder img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        }
+
+        .team-badge {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .question-mark {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .team-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 5px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* --- YILDIZ CSS ALANI --- */
+        .stars-display {
+            color: #eab308;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .half-star {
+            position: relative;
+            display: inline-block;
+            color: #eab308;
+        }
+
+        .half-star::after {
+            content: '⭐';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50%;
+            overflow: hidden;
+            color: #eab308;
+        }
+        
+        .half-star {
+            color: rgba(255, 255, 255, 0.15);
+        }
+        /* -------------------------------- */
+
+        .roll-btn {
+            background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 5px 20px rgba(56, 189, 248, 0.4);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .roll-btn:disabled {
+            background: #334155;
+            color: #64748b;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .shuffling {
+            animation: blurText 0.12s infinite alternate;
+        }
+        .shuffling-img {
+            animation: bounceImg 0.12s infinite alternate;
+        }
+
+        @keyframes blurText {
+            from { transform: scale(0.95); opacity: 0.6; }
+            to { transform: scale(1.05); opacity: 0.9; }
+        }
+        @keyframes bounceImg {
+            from { transform: translateY(-5px); }
+            to { transform: translateY(5px); }
+        }
+
+        @media (max-width: 500px) {
+            .vs-container { flex-direction: column; }
+            .player-card { min-height: 220px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <h1>FIFA VERSUS</h1>
+        <div class="subtitle">Adil Eşleşme ve Rastgele Takım Seçici</div>
+
+        <div class="filter-area">
+            <label for="starFilter">Takım Gücü:</label>
+            <select id="starFilter">
+                <option value="all">🎲 Karışık (Tüm Yıldızlar)</option>
+                <option value="5">⭐⭐⭐⭐⭐ 5 Yıldız</option>
+                <option value="4.5">⭐⭐⭐⭐⯨ 4.5 Yıldız</option>
+                <option value="4">⭐⭐⭐⭐ 4 Yıldız</option>
+            </select>
+        </div>
+
+        <div class="vs-container">
+            <div class="player-card p1" id="card1">
+                <div class="player-tag">PLAYER 1</div>
+                <div class="logo-placeholder" id="logo1">
+                    <span class="question-mark">?</span>
+                </div>
+                <div class="team-name" id="name1">TAKIM BEKLENİYOR</div>
+                <div class="stars-display" id="stars1">-</div>
+            </div>
+
+            <div class="player-card p2" id="card2">
+                <div class="player-tag">PLAYER 2</div>
+                <div class="logo-placeholder" id="logo2">
+                    <span class="question-mark">?</span>
+                </div>
+                <div class="team-name" id="name2">TAKIM BEKLENİYOR</div>
+                <div class="stars-display" id="stars2">-</div>
+            </div>
+        </div>
+
+        <button class="roll-btn" id="rollBtn" onclick="startDraft()">KURA ÇEK</button>
+    </div>
+
+    <script>
+        const teamDatabase = [
+            // 5 Yıldızlı Takımlar
+            { name: "Barcelona", stars: "5", filename: "barcelona.png", color: "#004D98", short: "BAR" },
+            { name: "Galatasaray", stars: "5", filename: "galatasaray.png", color: "#A32638", short: "GS" },
+            { name: "Arsenal", stars: "5", filename: "arsenal.png", color: "#EF0107", short: "ARS" },
+            { name: "Manchester City", stars: "5", filename: "manchestercity.png", color: "#6CABDD", short: "MCI" },
+            { name: "Manchester United", stars: "5", filename: "manchesterunited.png", color: "#DA291C", short: "MUN" },
+            { name: "Liverpool", stars: "5", filename: "liverpool.png", color: "#C8102E", short: "LIV" },
+            { name: "Real Madrid", stars: "5", filename: "realmadrid.png", color: "#1A3668", short: "RMA" },
+            { name: "Atletico Madrid", stars: "5", filename: "atleticomadrid.png", color: "#CB3524", short: "ATM" },
+            { name: "Inter", stars: "5", filename: "inter.png", color: "#0053A0", short: "INT" },
+            { name: "Bayern Münih", stars: "5", filename: "bayernmunih.png", color: "#DC052D", short: "FCB" },
+            { name: "PSG", stars: "5", filename: "psg.png", color: "#004170", short: "PSG" },
+
+            // 4.5 Yıldızlı Takımlar
+            { name: "Aston Villa", stars: "4.5", filename: "astonvilla.png", color: "#95BFE5", short: "AVL" },
+            { name: "Chelsea", stars: "4.5", filename: "chelsea.png", color: "#034694", short: "CHE" },
+            { name: "Newcastle", stars: "4.5", filename: "newcastle.png", color: "#241F20", short: "NEW" },
+            { name: "Tottenham", stars: "4.5", filename: "tottenham.png", color: "#132257", short: "TOT" },
+            { name: "Real Betis", stars: "4.5", filename: "realbetis.png", color: "#0BB364", short: "BET" },
+            { name: "Athletic Bilbao", stars: "4.5", filename: "athleticbilbao.png", color: "#EE2526", short: "ATH" },
+            { name: "Napoli", stars: "4.5", filename: "napoli.png", color: "#12A0D7", short: "NAP" },
+            { name: "Roma", stars: "4.5", filename: "roma.png", color: "#8E1E34", short: "ROM" },
+            { name: "Milan", stars: "4.5", filename: "nilan.png", color: "#E30613", short: "ACM" },
+            { name: "Juventus", stars: "4.5", filename: "juventus.png", color: "#000000", short: "JUV" },
+            { name: "Dortmund", stars: "4.5", filename: "dortmund.png", color: "#FDE100", short: "BVB" },
+            { name: "RB Leipzig", stars: "4.5", filename: "rbleipzig.png", color: "#DD013F", short: "RBL" },
+            { name: "Porto", stars: "4.5", filename: "porto.png", color: "#005CA9", short: "FCP" },
+            { name: "Benfica", stars: "4.5", filename: "benfica.png", color: "#E30613", short: "SLB" },
+            { name: "Fenerbahçe", stars: "4.5", filename: "fenerbahce.png", color: "#002F6C", short: "FB" },
+
+            // 4 Yıldızlı Takımlar
+            { name: "Marsilya", stars: "4", filename: "marsilya.png", color: "#00A2E8", short: "OM" },
+            { name: "Crystal Palace", stars: "4", filename: "crystalpalace.png", color: "#1B458F", short: "CRY" },
+            { name: "Stuttgart", stars: "4", filename: "stuttgart.png", color: "#E32119", short: "VFB" },
+            { name: "Beşiktaş", stars: "4", filename: "besiktas.png", color: "#000000", short: "BJK" },
+            { name: "Monaco", stars: "4", filename: "monaco.png", color: "#E30613", short: "ASM" },
+            { name: "Hoffenheim", stars: "4", filename: "hoffenheim.png", color: "#005CA9", short: "TSG" },
+            { name: "West Ham", stars: "4", filename: "westham.png", color: "#7A263A", short: "WHU" },
+            { name: "Bournemouth", stars: "4", filename: "bournemouth.png", color: "#B50E12", short: "BOU" },
+            { name: "Sunderland", stars: "4", filename: "sunderland.png", color: "#EB172B", short: "SUN" },
+            { name: "Brighton", stars: "4", filename: "brighton.png", color: "#0057B8", short: "BHA" },
+            { name: "Brentford", stars: "4", filename: "brentford.png", color: "#E30613", short: "BRE" },
+            { name: "Fulham", stars: "4", filename: "fulham.png", color: "#000000", short: "FUL" },
+            { name: "Everton", stars: "4", filename: "everton.png", color: "#003399", short: "EVE" },
+            { name: "Nottingham Forest", stars: "4", filename: "nottinghamforest.png", color: "#DD0000", short: "NFO" },
+            { name: "Wolves", stars: "4", filename: "wolves.png", color: "#FDB913", short: "WOL" },
+            { name: "Villarreal", stars: "4", filename: "villareal.png", color: "#FFD000", short: "VIL" },
+            { name: "Real Sociedad", stars: "4", filename: "realsociedad.png", color: "#0066B2", short: "RSO" },
+            { name: "Como", stars: "4", filename: "como.png", color: "#1D428A", short: "COM" },
+            { name: "Atalanta", stars: "4", filename: "atalanta.png", color: "#1E71B8", short: "ATA" },
+            { name: "Bologna", stars: "4", filename: "bologna.png", color: "#A71930", short: "BOL" },
+            { name: "Lazio", stars: "4", filename: "lazio.png", color: "#87D3F8", short: "LAZ" },
+            { name: "Fiorentina", stars: "4", filename: "fiorentina.png", color: "#4C2375", short: "FIO" },
+            { name: "Bayer Leverkusen", stars: "4", filename: "bayerleverkusen.png", color: "#E32119", short: "B04" },
+            { name: "Freiburg", stars: "4", filename: "freiburg.png", color: "#D3011C", short: "SCF" },
+            { name: "Eintracht Frankfurt", stars: "4", filename: "frankfurt.png", color: "#E1000F", short: "SGE" },
+            { name: "Mainz 05", stars: "4", filename: "mainz.png", color: "#C30000", short: "M05" },
+            { name: "Mönchengladbach", stars: "4", filename: "mgladbah.png", color: "#009751", short: "BMG" },
+            { name: "Lens", stars: "4", filename: "lens.png", color: "#E30613", short: "RCL" },
+            { name: "Lille", stars: "4", filename: "lille.png", color: "#132257", short: "LOS" },
+            { name: "Lyon", stars: "4", filename: "lyon.png", color: "#102F52", short: "OL" },
+            { name: "Rennes", stars: "4", filename: "rennes.png", color: "#E30613", short: "SRF" },
+            { name: "Sporting CP", stars: "4", filename: "sporting.png", color: "#008057", short: "SCP" },
+            { name: "Braga", stars: "4", filename: "braga.png", color: "#E30613", short: "SCB" },
+            { name: "PSV Eindhoven", stars: "4", filename: "psv.png", color: "#E30613", short: "PSV" },
+            { name: "Feyenoord", stars: "4", filename: "feyenord.png", color: "#E30613", short: "FEY" },
+            { name: "Ajax", stars: "4", filename: "ajax.png", color: "#D21226", short: "AJX" },
+            { name: "Trabzonspor", stars: "4", filename: "trabzonspor.png", color: "#800020", short: "TS" },
+            { name: "Samsunspor", stars: "4", filename: "samsunspor.png", color: "#E30613", short: "SAM" },
+            { name: "Olimpiakos", stars: "4", filename: "olympiacos.png", color: "#D1212A", short: "OLY" },
+            { name: "Qarabağ FK", stars: "4", filename: "karabag.png", color: "#004B23", short: "QAR" },
+            { name: "Club Brugge", stars: "4", filename: "clubbrugge.png", color: "#003399", short: "CLU" },
+            { name: "Kopenhag", stars: "4", filename: "kopenhag.png", color: "#003399", short: "FCK" },
+            { name: "Midtjylland", stars: "4", filename: "midtjylland.png", color: "#990033", short: "FCM" },
+            { name: "Genk", stars: "4", filename: "genk.png", color: "#0065A3", short: "GNK" },
+            { name: "Strasbourg", stars: "4", filename: "strasbourg.png", color: "#005CA9", short: "RCSA" },
+            { name: "Rayo Vallecano", stars: "4", filename: "rayovalecano.png", color: "#D81A21", short: "RVA" },
+            { name: "Shakhtar Donetsk", stars: "4", filename: "shaktar.png", color: "#FF5E00", short: "FCSD" }
+        ];
+
+        function updateStarsDOM(element, starVal) {
+            if (starVal === "5") {
+                element.innerHTML = "⭐⭐⭐⭐⭐";
+            } else if (starVal === "4.5") {
+                element.innerHTML = "⭐⭐⭐⭐<span class='half-star'>⭐</span>";
+            } else {
+                element.innerHTML = "⭐⭐⭐⭐";
+            }
+        }
+
+        // Kırılmaya sebep olan hatalı JavaScript satırı düzeltildi
+        function generateLogoHTML(teamObj, isShuffling = false) {
+            const shuffleClass = isShuffling ? 'class="shuffling-img"' : '';
+            const fallbackHTML = `<div class='team-badge' style='background: linear-gradient(135deg, ${teamObj.color}, #111827); border-color: ${teamObj.color};'>${teamObj.short}</div>`;
+            
+            return `<img src="logos/${teamObj.filename}" ${shuffleClass} onerror="this.onerror=null; this.parentElement.innerHTML=\`${fallbackHTML}\`; ">`;
+        }
+
+        function startDraft() {
+            const selectedStar = document.getElementById('starFilter').value;
+            const rollBtn = document.getElementById('rollBtn');
+            
+            let filteredPool = selectedStar === "all" ? [...teamDatabase] : teamDatabase.filter(t => t.stars === selectedStar);
+            
+            if (filteredPool.length < 2) {
+                alert("Yeterli takım yok!");
+                return;
+            }
+
+            rollBtn.disabled = true;
+
+            const name1 = document.getElementById('name1');
+            const name2 = document.getElementById('name2');
+            const logo1 = document.getElementById('logo1');
+            const logo2 = document.getElementById('logo2');
+            const stars1 = document.getElementById('stars1');
+            const stars2 = document.getElementById('stars2');
+            const card1 = document.getElementById('card1');
+            const card2 = document.getElementById('card2');
+
+            name1.classList.add('shuffling');
+            name2.classList.add('shuffling');
+            card1.classList.add('active-selection');
+            card2.classList.add('active-selection');
+
+            let counter = 0;
+            const maxTicks = 15;
+
+            const interval = setInterval(() => {
+                const temp1 = filteredPool[Math.floor(Math.random() * filteredPool.length)];
+                const temp2 = filteredPool[Math.floor(Math.random() * filteredPool.length)];
+                
+                name1.textContent = temp1.name.toUpperCase();
+                name2.textContent = temp2.name.toUpperCase();
+                
+                updateStarsDOM(stars1, temp1.stars);
+                updateStarsDOM(stars2, temp2.stars);
+
+                logo1.innerHTML = generateLogoHTML(temp1, true);
+                logo2.innerHTML = generateLogoHTML(temp2, true);
+
+                counter++;
+
+                if (counter >= maxTicks) {
+                    clearInterval(interval);
+
+                    const finalIndex1 = Math.floor(Math.random() * filteredPool.length);
+                    let finalIndex2 = Math.floor(Math.random() * filteredPool.length);
+
+                    while (finalIndex1 === finalIndex2 && filteredPool.length > 1) {
+                        finalIndex2 = Math.floor(Math.random() * filteredPool.length);
+                    }
+
+                    const finalTeam1 = filteredPool[finalIndex1];
+                    const finalTeam2 = filteredPool[finalIndex2];
+
+                    name1.textContent = finalTeam1.name.toUpperCase();
+                    name2.textContent = finalTeam2.name.toUpperCase();
+                    
+                    updateStarsDOM(stars1, finalTeam1.stars);
+                    updateStarsDOM(stars2, finalTeam2.stars);
+                    
+                    logo1.innerHTML = generateLogoHTML(finalTeam1, false);
+                    logo2.innerHTML = generateLogoHTML(finalTeam2, false);
+
+                    name1.classList.remove('shuffling');
+                    name2.classList.remove('shuffling');
+                    card1.classList.remove('active-selection');
+                    card2.classList.remove('active-selection');
+                    
+                    rollBtn.disabled = false;
+                }
+            }, 100);
+        }
+    </script>
+</body>
+</html>
